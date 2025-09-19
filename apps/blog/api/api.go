@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/infraboard/mcube/v2/ioc"
+	ioc_gin "github.com/infraboard/mcube/v2/ioc/config/gin"
 	"github.com/xmtlzzz/vblog/apps/blog"
 	"github.com/xmtlzzz/vblog/middleware"
 	"github.com/xmtlzzz/vblog/response"
-	"github.com/xmtlzzz/vblog/server"
 )
 
 func init() {
@@ -27,26 +27,16 @@ func (b *BlogApiHandler) Name() string {
 // 重写ioc框架的Init方法实现服务注册，等于是在main中直接调用registry方法注册路由
 func (b *BlogApiHandler) Init() error {
 	b.blog = blog.GetService()
-	b.Registry(server.GinServer)
+	// url路径一般为/api/mcube_service/v1/hello_module/
+	r := ioc_gin.ObjectRouter(b)
+	r.Use(middleware.Auth)
+	r.POST("/create", b.CreateBlog)
+	r.GET("/query", b.QueryBlog)
+	r.GET("/describe/:id", b.DescribeBlog)
+	r.PUT("/update/:id", b.UpdateBlog)
+	r.POST("/publish/:id", b.PublishBlog)
+	r.DELETE("/delete/:id", b.DeleteBlog)
 	return nil
-}
-
-//func NewBlogApiHandler(blogHandler *impl.BlogServiceImpl) *BlogApiHandler {
-//	return &BlogApiHandler{
-//		blog: blogHandler,
-//	}
-//}
-
-func (b *BlogApiHandler) Registry(ge *gin.Engine) {
-	server := ge.Group("/vblog/api/v1/blogs/")
-	// 注册路由中间件
-	server.Use(middleware.Auth)
-	server.POST("/create", b.CreateBlog)
-	server.GET("/query", b.QueryBlog)
-	server.GET("/describe/:id", b.DescribeBlog)
-	server.PUT("/update/:id", b.UpdateBlog)
-	server.POST("/publish/:id", b.PublishBlog)
-	server.DELETE("/delete/:id", b.DeleteBlog)
 }
 
 func (b *BlogApiHandler) CreateBlog(ctx *gin.Context) {

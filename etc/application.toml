@@ -1,3 +1,8 @@
+# 注册到ioc的gin调用，那么就是mcube_service的名字
+[app]
+name = "vblog"
+description = "app desc"
+
 [http]
 # HTTP服务Host
 host = "127.0.0.1"

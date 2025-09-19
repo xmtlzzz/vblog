@@ -4,8 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/infraboard/mcube/v2/http/gin/response"
 	"github.com/infraboard/mcube/v2/ioc"
+	ioc_gin "github.com/infraboard/mcube/v2/ioc/config/gin"
 	"github.com/xmtlzzz/vblog/apps/token"
-	"github.com/xmtlzzz/vblog/server"
+	"github.com/xmtlzzz/vblog/middleware"
 )
 
 func init() {
@@ -24,22 +25,23 @@ func (t *TokenAPIHandler) Name() string {
 // 重写ioc框架的Init方法实现服务注册，等于是在main中直接调用registry方法注册路由
 func (t *TokenAPIHandler) Init() error {
 	t.token = token.GetService()
-	t.Registry(server.GinServer)
+
+	// 获取模块路由，带有url前缀
+	r := ioc_gin.ObjectRouter(t)
+	// 从ioc获取gin来实现api接口
+	r.Use(middleware.Auth)
+	r.POST("/", t.IssueToken)
+	r.POST("/revolk", t.RevolkToken)
+	r.POST("/refresh", t.RefreshToken)
 	return nil
 }
 
-//func NewBTokenAPIHandler(tokenService *impl.TokenServiceImpl) *TokenAPIHandler {
-//	return &TokenAPIHandler{
-//		token: tokenService,
-//	}
+//func (t *TokenAPIHandler) Registry(ge *gin.Engine) {
+//	server := ge.Group("/vblog/api/v1/tokens")
+//	server.POST("/", t.IssueToken)
+//	server.POST("/revolk", t.RevolkToken)
+//	server.POST("/refresh", t.RefreshToken)
 //}
-
-func (t *TokenAPIHandler) Registry(ge *gin.Engine) {
-	server := ge.Group("/vblog/api/v1/tokens")
-	server.POST("/", t.IssueToken)
-	server.POST("/revolk", t.RevolkToken)
-	server.POST("/refresh", t.RefreshToken)
-}
 
 // 颁发token
 func (t *TokenAPIHandler) IssueToken(ctx *gin.Context) {
