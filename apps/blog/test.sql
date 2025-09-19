@@ -1,0 +1,15 @@
+CREATE TABLE `blogs` (
+                         `user_id` VARCHAR ( 255 ),
+                         `created_at` DATETIME ( 3 ) NOT NULL,
+                         `create_by` LONGTEXT,
+                         `update_at` DATETIME ( 3 ) NULL,
+                         `title` VARCHAR ( 255 ),
+                         `summary` TEXT,
+                         `content` TEXT,
+                         `category` VARCHAR ( 255 ),
+                         `tags` LONGTEXT,
+                         `stages` TINYINT,
+                         `change_at` DATETIME ( 3 ) NULL,
+                         INDEX `idx_blogs_user_id` ( `user_id` ),
+                         INDEX `idx_blogs_stages` ( `stages` ),
+                         CONSTRAINT `uni_blogs_user_id` UNIQUE ( `user_id` ))

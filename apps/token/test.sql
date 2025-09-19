@@ -1,0 +1,15 @@
+CREATE TABLE `tokens` (
+                          `id` BIGINT AUTO_INCREMENT,
+                          `ref_user_id` VARCHAR ( 191 ),
+                          `access_token` VARCHAR ( 191 ),
+                          `issue_at` DATETIME ( 3 ) NULL,
+                          `access_token_expire_at` DATETIME ( 3 ) NULL,
+                          `refresh_token` VARCHAR ( 191 ),
+                          `refresh_token_expire_at` DATETIME ( 3 ) NULL,
+                          PRIMARY KEY ( `id` ),
+                          INDEX `idx_tokens_ref_user_id` ( `ref_user_id` ),
+                          INDEX `idx_tokens_access_token` ( `access_token` ),
+                          INDEX `idx_tokens_refresh_token` ( `refresh_token` ),
+                          CONSTRAINT `uni_tokens_access_token` UNIQUE ( `access_token` ),
+                          CONSTRAINT `uni_tokens_refresh_token` UNIQUE ( `refresh_token` ),
+                          CONSTRAINT `uni_tokens_ref_user_id` UNIQUE ( `ref_user_id` ))

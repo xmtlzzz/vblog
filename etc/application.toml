@@ -1,0 +1,25 @@
+[http]
+# HTTP服务Host
+host = "127.0.0.1"
+# HTTP服务端口
+port = 8080
+
+[datasource]
+host = "192.168.136.101"
+port = 3306
+database = "vblog"
+username = "xmtlz"
+password = "Qwer1234"
+debug = true
+
+[log]
+# 日志的级别, 默认Debug
+level = "debug"
+
+[log.console]
+enable = true
+no_color = false
+
+[log.file]
+# 是否开启文件记录
+enable = true

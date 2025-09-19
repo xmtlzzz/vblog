@@ -1,0 +1,16 @@
+CREATE TABLE `users` (
+                         `user_id` VARCHAR ( 255 ),
+                         `created_at` DATETIME ( 3 ) NOT NULL,
+                         `create_by` LONGTEXT,
+                         `update_at` DATETIME ( 3 ) NULL,
+                         `username` VARCHAR ( 255 ),
+                         `password` VARCHAR ( 255 ),
+                         `avatar` VARCHAR ( 100 ),
+                         `nick_name` VARCHAR ( 255 ),
+                         `email` VARCHAR ( 255 ),
+                         `block_at` DATETIME ( 3 ) NULL,
+                         `block_reason` LONGTEXT,
+                         INDEX `idx_users_user_id` ( `user_id` ),
+                         INDEX `idx_users_username` ( `username` ),
+                         CONSTRAINT `uni_users_user_id` UNIQUE ( `user_id` ),
+                         CONSTRAINT `uni_users_username` UNIQUE ( `username` ))
