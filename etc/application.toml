@@ -10,7 +10,7 @@ host = "127.0.0.1"
 port = 8080
 
 [datasource]
-host = "192.168.136.101"
+host = "192.168.81.101"
 port = 3306
 database = "vblog"
 username = "xmtlz"

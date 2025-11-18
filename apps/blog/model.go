@@ -44,17 +44,18 @@ func NewBlog(b *CreateBlogRequest) (*Blog, error) {
 	}, nil
 }
 
+// summary、content、tag可以不传递，用户在前端可以只创建文章
 type CreateBlogRequest struct {
 	// 标题
-	Title string `json:"title" gorm:"column:title;type:varchar(255)" validate:"required"`
+	Title string `json:"title" form:"title" gorm:"column:title;type:varchar(255)" validate:"required"`
 	// 摘要，内容较大使用text存储
-	Summary string `json:"summary" gorm:"column:summary;type:text" validate:"required"`
+	Summary string `json:"summary" form:"summary" gorm:"column:summary;type:text"`
 	// 内容
-	Content string `json:"content" gorm:"column:content;type:text" validate:"required"`
+	Content string `json:"content" form:"content" gorm:"column:content;type:text"`
 	// 分类
-	Category string `json:"category" gorm:"column:category;type:varchar(255)" validate:"required"`
+	Category string `json:"category" form:"category" gorm:"column:category;type:varchar(255)" validate:"required"`
 	// 标签，gorm中想要直接存储map类型的结构需要序列化serializer实现json序列化
-	Tags map[string]string `json:"tags" gorm:"column:tags;serializer:json"`
+	Tags map[string]string `json:"tags" form:"tags" gorm:"column:tags;serializer:json"`
 }
 
 // 构造方法

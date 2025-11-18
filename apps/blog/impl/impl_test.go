@@ -13,19 +13,32 @@ var ctx = context.Background()
 
 // 从ioc池子获取对象
 
-func TestCreateBlog(t *testing.T) {
+func BenchmarkBlogServiceImpl_QueryBlog(t *testing.B) {
 	t.Setenv("workdir", "C:\\Users\\Administrator\\Desktop\\code\\Go\\vblog")
+	var it = blog.NewQueryBlogRequest()
+	it.Tags = map[string]string{"language": "golang"}
+	ins, err := blog.GetService().QueryBlog(ctx, it)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, v := range ins.Items {
+		t.Log(v)
+	}
+}
+
+func TestCreateBlog(t *testing.T) {
+	t.Setenv("workdir", "D:\\Desktop\\code\\Go\\vblog")
 	var it = blog.CreateBlogRequest{
-		Title:    "POSTMAN测试01",
+		Title:    "测试5",
 		Summary:  "gin and gorm1",
-		Content:  "test1",
+		Content:  "test2",
 		Category: "软件开发1",
 		Tags: map[string]string{
 			"language": "golang",
 		},
 	}
 	// 携带token进行中间件鉴权
-	tk := token.Token{AccessToken: "b00c142f-18e1-49c5-9cca-a35f42f70449"}
+	tk := token.Token{AccessToken: "123"}
 	ct := context.WithValue(ctx, middleware.TokenCtxKey{}, &tk)
 	// 从ioc池子获取对象，定义在interface层
 	ins, err := blog.GetService().CreateBlog(ct, &it)
@@ -75,7 +88,8 @@ func TestPublishBlog(t *testing.T) {
 	t.Setenv("workdir", "C:\\Users\\Administrator\\Desktop\\code\\Go\\vblog")
 	var it = blog.NewPublishBlogRequest()
 	it.Id = 7
-	ins, err := blog.GetService().PublishBlog(ctx, it)
+	var status = &blog.StatusSpec{Stages: blog.STAGE_PUBLISHED}
+	ins, err := blog.GetService().PublishBlog(ctx, it, status)
 	if err != nil {
 		t.Error(err)
 	}

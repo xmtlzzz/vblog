@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	AppName = "blog"
+	AppName = "blogs"
 )
 
 func GetService() Service {
@@ -27,9 +27,11 @@ type Service interface {
 	//+ 博客编辑
 	UpdateBlog(context.Context, *UpdateBlogRequest) (*Blog, error)
 	//+ 博客发布
-	PublishBlog(context.Context, *PublishBlogRequest) (*Blog, error)
+	PublishBlog(context.Context, *PublishBlogRequest, *StatusSpec) (*Blog, error)
 	//+ 博客撤销（删除）
 	DeleteBlog(context.Context, *DeleteBlogRequest) error
+	// 前台请求免token查询
+	FrontendQueryBlog(context.Context, utils.PageRequest) (*BlogSet, error)
 }
 
 type DeleteBlogRequest struct {

@@ -59,7 +59,6 @@ func (u *UserServiceImpl) Registry(ctx context.Context, request *user.RegistryRe
 		return nil, err
 	}
 	ins.Password = string(hashPassword)
-	// mcube封装逻辑，内部实现事物操作
 	db = utils.NewDBConnecter()
 	if err := db.WithContext(ctx).Create(ins).Error; err != nil {
 		return nil, err

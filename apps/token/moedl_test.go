@@ -12,7 +12,7 @@ var db *gorm.DB
 
 func TestTokenTable(t *testing.T) {
 	// 进程内环境变量设置，toml配置文件路径
-	t.Setenv("workdir", "C:\\Users\\Administrator\\Desktop\\code\\Go\\vblog")
+	t.Setenv("workdir", "D:\\Desktop\\code\\Go\\vblog")
 	db = utils.NewDBConnecter()
 	if err := db.AutoMigrate(&token.Token{}); err != nil {
 		t.Fatal(err)

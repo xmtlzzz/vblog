@@ -15,7 +15,7 @@ func LoadConfig() {
 	req.ConfigFile.Enabled = true
 	workspecDir := os.Getenv("workdir")
 	if workspecDir == "" {
-		workspecDir = "C:\\Users\\Administrator\\Desktop\\code\\Go\\vblog"
+		workspecDir = "D:\\Desktop\\code\\Go\\vblog"
 	} else {
 		req.ConfigFile.Path = workspecDir + "\\etc\\application.toml"
 	}

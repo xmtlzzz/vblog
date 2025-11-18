@@ -12,9 +12,9 @@ import (
 var ctx = context.Background()
 
 func TestRegistry(t *testing.T) {
-	t.Setenv("workdir", "C:\\Users\\Administrator\\Desktop\\code\\Go\\vblog")
+	t.Setenv("workdir", "D:\\Desktop\\code\\Go\\vblog")
 	request := user.NewRegistryRequest()
-	request.Username = "sz"
+	request.Username = "xmtlz"
 	request.Password = "123456"
 	ins, err := impl.UserService.Registry(ctx, request)
 	if err != nil {

@@ -8,4 +8,4 @@ test目录用来存储需要解析的配置文件，引入mcube框架来实现�
 每个模块内都存在单元测试，但是配置文件放在etc目录所以要通过环境变量区加载配置文件路径
 
 goland不需要像vscode那样书写json，直接可以指定
-![img.png](../docs/img.png)
+![img.png](../docs/golandenv.png)

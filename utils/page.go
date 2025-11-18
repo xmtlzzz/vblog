@@ -3,9 +3,9 @@ package utils
 // 分页查找的实现，对应之后argodesion的前端UI
 type PageRequest struct {
 	// 分页总数
-	PageSize uint `json:"page_size"`
+	PageSize uint `json:"page_size"  form:"page_size"`
 	// 当前分页
-	PageNum uint `json:"page_num"`
+	PageNum uint `json:"page_num"  form:"page_num"`
 }
 
 func NewPageRequest() *PageRequest {

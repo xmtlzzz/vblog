@@ -9,6 +9,7 @@ import (
 	"github.com/xmtlzzz/vblog/apps/blog"
 	"github.com/xmtlzzz/vblog/middleware"
 	"github.com/xmtlzzz/vblog/response"
+	"github.com/xmtlzzz/vblog/utils"
 )
 
 func init() {
@@ -29,6 +30,7 @@ func (b *BlogApiHandler) Init() error {
 	b.blog = blog.GetService()
 	// url路径一般为/api/mcube_service/v1/hello_module/
 	r := ioc_gin.ObjectRouter(b)
+	r.GET("/frontend_query", b.FrontendQueryBlog)
 	r.Use(middleware.Auth)
 	r.POST("/create", b.CreateBlog)
 	r.GET("/query", b.QueryBlog)
@@ -62,7 +64,7 @@ func (b *BlogApiHandler) QueryBlog(ctx *gin.Context) {
 	}
 	// 从url中获取kv对参数，指定tag=xxx
 	// 通过SetTag方法实现自定义Tags属性输出
-	bg.SetTag(ctx.Query("tag"))
+	bg.SetTag(ctx.Query("tags"))
 	ins, err := b.blog.QueryBlog(ctx.Request.Context(), bg)
 	if err != nil {
 		response.Failed(ctx, err)
@@ -115,13 +117,18 @@ func (b *BlogApiHandler) UpdateBlog(ctx *gin.Context) {
 // + 博客发布
 func (b *BlogApiHandler) PublishBlog(ctx *gin.Context) {
 	bg := &blog.PublishBlogRequest{}
+	status := &blog.StatusSpec{}
+	if err := ctx.BindJSON(status); err != nil {
+		response.Failed(ctx, err)
+		return
+	}
 	idInt, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		response.Failed(ctx, err)
 		return
 	}
 	bg.Id = uint(idInt)
-	ins, err := b.blog.PublishBlog(ctx.Request.Context(), bg)
+	ins, err := b.blog.PublishBlog(ctx.Request.Context(), bg, status)
 	if err != nil {
 		response.Failed(ctx, err)
 		return
@@ -144,4 +151,18 @@ func (b *BlogApiHandler) DeleteBlog(ctx *gin.Context) {
 		return
 	}
 	response.Success(ctx, "删除成功")
+}
+
+func (b *BlogApiHandler) FrontendQueryBlog(ctx *gin.Context) {
+	pg := utils.PageRequest{}
+	if err := ctx.BindQuery(&pg); err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	ins, err := b.blog.FrontendQueryBlog(ctx.Request.Context(), pg)
+	if err != nil {
+		response.Failed(ctx, err)
+		return
+	}
+	response.Success(ctx, ins)
 }

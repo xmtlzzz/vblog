@@ -41,7 +41,7 @@ func TestRevolkToken(t *testing.T) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
-	ins, err := token.GetService().RevolkToken(ctx, it)
+	ins, err := token.GetService().RevolkToken(ctx, &it)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,4 +58,9 @@ func TestRefreshToken(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(ins)
+}
+
+func Test123(t *testing.T) {
+	res := token.GetService().Test()
+	t.Log(res)
 }

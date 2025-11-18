@@ -55,6 +55,15 @@ func (t *Token) IsAccessTkExpired() error {
 	return exception.NewBadRequest("AccessToken已过期")
 }
 
+func (t *Token) AccessTokenExpireTTL() int {
+	// 如果过期时间为空，那么cookie持续时间为0
+	if t.AccessTokenExpireAt == nil {
+		return 0
+	}
+	// 如果不为空，那么就根据现在到过期时间还有多久返回
+	return int(t.AccessTokenExpireAt.Sub(time.Now()).Seconds())
+}
+
 func (t *Token) IsRefreshTkExpired() error {
 	if time.Now().Before(*t.RefreshTokenExpireAt) {
 		return nil

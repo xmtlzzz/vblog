@@ -27,10 +27,11 @@ type Outer interface {
 	IssueToken(context.Context, IssueTokenRequest) (*Token, error)
 
 	// + 退出、撤销令牌
-	RevolkToken(context.Context, RevolkTokenRequest) (*Token, error)
+	RevolkToken(context.Context, *RevolkTokenRequest) (*Token, error)
 
 	// refreshtoken有效期内刷新accesstoken
 	RefreshToken(context.Context, RefreshTokenRequest) (*Token, error)
+	Test() int
 }
 
 // 2. 内部

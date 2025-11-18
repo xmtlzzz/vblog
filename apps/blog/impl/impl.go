@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/infraboard/mcube/v2/exception"
 	"github.com/infraboard/mcube/v2/ioc"
@@ -43,10 +45,14 @@ func (b BlogServiceImpl) CreateBlog(ctx context.Context, request *blog.CreateBlo
 	if err := db.WithContext(ctx).Where("access_token = ?", &tk.AccessToken).Take(tk).Error; err != nil {
 		return nil, err
 	}
-	fmt.Println(tk)
 	// 添加关联信息
 	ins.CreateBy = strconv.Itoa(tk.RefUserId)
 	if err := db.WithContext(ctx).Create(ins).Error; err != nil {
+		if strings.Contains(err.Error(), "Error 1062") {
+			// 这里判断如果是key冲突，
+			return ins, exception.NewBadRequest("该文章已在当前用户 - 分类中创建，请更换标题名称")
+		}
+		// 如果不是key冲突，那么直接返回明细的error信息
 		return nil, err
 	}
 	return ins, nil
@@ -88,7 +94,6 @@ func (b BlogServiceImpl) QueryBlog(ctx context.Context, request *blog.QueryBlogR
 		return nil, err
 	}
 	return set, nil
-
 }
 
 func (b BlogServiceImpl) DescribeBlog(ctx context.Context, request *blog.DescribeBlogRequest) (*blog.Blog, error) {
@@ -102,8 +107,9 @@ func (b BlogServiceImpl) DescribeBlog(ctx context.Context, request *blog.Describ
 
 func (b BlogServiceImpl) UpdateBlog(ctx context.Context, request *blog.UpdateBlogRequest) (*blog.Blog, error) {
 	var bg = &blog.Blog{}
+	bg.Id = int(request.Id)
 	db = utils.NewDBConnecter()
-	if err := db.WithContext(ctx).Where("id = ?", request.Id).Take(bg).Error; err != nil {
+	if err := db.WithContext(ctx).Take(bg).Error; err != nil {
 		return nil, exception.NewBadRequest("查找的blog不存在,err: %v", err)
 	}
 	if request.Title != "" {
@@ -125,17 +131,18 @@ func (b BlogServiceImpl) UpdateBlog(ctx context.Context, request *blog.UpdateBlo
 			bg.Tags[i] = v
 		}
 	}
-	if err := db.WithContext(ctx).Where("id = ?", request.Id).Updates(bg).Error; err != nil {
+	if err := db.WithContext(ctx).Where("id = ?", bg.Id).Updates(bg).Error; err != nil {
 		return nil, exception.NewBadRequest("更新失败查找的blog不存在,err: %v", err)
 	}
 	return bg, nil
 }
 
-func (b BlogServiceImpl) PublishBlog(ctx context.Context, request *blog.PublishBlogRequest) (*blog.Blog, error) {
+func (b BlogServiceImpl) PublishBlog(ctx context.Context, request *blog.PublishBlogRequest, blogStatus *blog.StatusSpec) (*blog.Blog, error) {
 	var bg = &blog.Blog{}
 	// 发布
 	db = utils.NewDBConnecter()
-	bg.Stages = blog.STAGE_PUBLISHED
+	// 解析来自前端传递的stage信息
+	bg.Stages = blogStatus.Stages
 	if err := db.WithContext(ctx).Where("id = ?", request.Id).Updates(bg).Error; err != nil {
 		return nil, exception.NewBadRequest("查找的blog不存在，公开文章失败,err: %v", err)
 	}
@@ -147,9 +154,26 @@ func (b BlogServiceImpl) PublishBlog(ctx context.Context, request *blog.PublishB
 
 func (b BlogServiceImpl) DeleteBlog(ctx context.Context, request *blog.DeleteBlogRequest) error {
 	var bg = &blog.Blog{}
+	time.Sleep(3 * time.Second)
 	db = utils.NewDBConnecter()
 	if err := db.WithContext(ctx).Where("id = ?", request.Id).Delete(bg).Error; err != nil {
 		return exception.NewBadRequest("查找的blog不存在或已经被删除,err: %v", err)
 	}
 	return nil
+}
+
+func (BlogServiceImpl) FrontendQueryBlog(ctx context.Context, ps utils.PageRequest) (*blog.BlogSet, error) {
+	var bs = blog.NewBlogSet()
+	db = utils.NewDBConnecter()
+	db = db.WithContext(ctx).Model(&blog.Blog{})
+	if err := db.Where("stages = 1").Count(&bs.Total).Error; err != nil {
+		return nil, err
+	}
+	if ps.PageSize == 0 {
+		ps.PageSize++
+	}
+	if err := db.Where("stages = 1").Offset(int(ps.Offset())).Limit(int(ps.PageSize)).Find(&bs.Items).Error; err != nil {
+		return nil, exception.NewBadRequest("查找失败，检查后端业务逻辑是否正确")
+	}
+	return bs, nil
 }

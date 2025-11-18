@@ -2,7 +2,7 @@ package impl
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/infraboard/mcube/v2/exception"
@@ -25,18 +25,12 @@ var db *gorm.DB
 type TokenServiceImpl struct {
 	ioc.ObjectImpl
 	// 调用DescribeUser查询用户
-	UserSvc user.AdminService
+	UserSvc        user.AdminService
+	TokenExpireTTL int `json:"token_expire_ttl" toml:"token_expire_ttl"`
 }
 
 func (*TokenServiceImpl) Name() string {
 	return token.AppName
-}
-
-// 属性依赖通过外部传入，并且返回接口更加容易扩展
-func NewTokenServiceImpl(user user.AdminService) *TokenServiceImpl {
-	return &TokenServiceImpl{
-		UserSvc: user,
-	}
 }
 
 func (t *TokenServiceImpl) IssueToken(ctx context.Context, request token.IssueTokenRequest) (*token.Token, error) {
@@ -50,26 +44,31 @@ func (t *TokenServiceImpl) IssueToken(ctx context.Context, request token.IssueTo
 		DescribeBy: user.Describe_By_UserName,
 		Value:      request.Username,
 	})
-	fmt.Println(ins)
 	if err != nil {
 		return nil, exception.NewBadRequest("%v", err)
 	}
 	// 2. 对比密码，传入的密码是申请token的密码，去和查询得到的hash比对
 	if err := ins.CheckPassword([]byte(request.Password)); err != nil {
-		return nil, exception.NewBadRequest("密码不对应")
+		return nil, exception.NewBadRequest("用户名或密码错误")
 	}
 	// 3. 颁发token，使用查询到的User实例的UserId填充token表，两表逻辑对应
 	// 链式编程实现不能多个返回值必须返回*Token类型，设置RefUserName，两表逻辑对应
 	tk := token.GenNewToken(ins.Id).SetRefUserName(ins.Username)
 	db = utils.NewDBConnecter()
 	if err := db.WithContext(ctx).Create(tk).Error; err != nil {
-		return nil, exception.NewBadRequest("key冲突，用户token已存在")
+		// 使用字符串包含的方式当判断存在1062也就是key冲突的时候不返回err内容，直接让前端用户跳转
+		if strings.Contains(err.Error(), "Error 1062") {
+			// 这里判断如果是key冲突，那么就直接返回上面GenNewToken方法创建的tk实例即可，否则就会导致空指针
+			return tk, nil
+		}
+		// 如果不是key冲突，那么直接返回明细的error信息
+		return nil, err
 	}
 	return tk, nil
 }
 
 // 撤销token
-func (t *TokenServiceImpl) RevolkToken(ctx context.Context, request token.RevolkTokenRequest) (*token.Token, error) {
+func (t *TokenServiceImpl) RevolkToken(ctx context.Context, request *token.RevolkTokenRequest) (*token.Token, error) {
 	var tk = &token.Token{}
 	db = utils.NewDBConnecter()
 	if err := db.WithContext(ctx).Where("access_token = ? and refresh_token = ?", request.AccessToken, request.RefreshToken).Delete(tk).Error; err != nil {
@@ -111,4 +110,8 @@ func (t *TokenServiceImpl) RefreshToken(ctx context.Context, request token.Refre
 		return nil, err
 	}
 	return tk, nil
+}
+
+func (t *TokenServiceImpl) Test() int {
+	return t.TokenExpireTTL
 }

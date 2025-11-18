@@ -10,6 +10,7 @@ import (
 	"github.com/xmtlzzz/vblog/response"
 )
 
+// 自定义中间件返回token以及cookie
 func Auth(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	// 基于bear token的形式，得到存储bear和token的切片
@@ -18,6 +19,19 @@ func Auth(c *gin.Context) {
 	if len(tkList) == 2 {
 		accessToken = tkList[1]
 	}
+
+	// 如果accessToken为空就提取cookie作为accesstoken
+	if accessToken == "" {
+		// 提取gin.Context对象携带的cookie信息
+		ck, err := c.Cookie(token.CookieName)
+		if err != nil {
+			response.Failed(c, err)
+			return
+		} else {
+			accessToken = ck
+		}
+	}
+
 	tk, err := impl.TokenService.ValidateToken(c.Request.Context(), token.NewValidateTokenRequest(accessToken))
 	if err != nil {
 		response.Failed(c, err)
@@ -25,6 +39,7 @@ func Auth(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
 	// 声明新的context对象携带token信息，用于后续其他模块调用验证token
 	// 这里key直接使用字符串不行，所以自定义一个结构体
 	ctx := context.WithValue(c.Request.Context(), TokenCtxKey{}, tk)
