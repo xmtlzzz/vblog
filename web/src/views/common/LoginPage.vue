@@ -121,6 +121,7 @@ const handlerRevolk = () => {
 onMounted(() => {
   if (login_info.value.remember_me) {
     form.username = getDecryptedStorage('userName')
+    // 直接getDecryptedStorage的话会解析为number，后端要求类型
     form.password = String(getDecryptedStorage('userPassword'))
   }
 })
