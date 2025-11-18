@@ -8,6 +8,6 @@ export const menu_key = useStorage('menu',
 
 
 export const login_info = useStorage('login_info',
-  {"username":"","password":""},
+  {"username":"","password":"","remember_me":false},
   localStorage,{mergeDefaults:true}
 )

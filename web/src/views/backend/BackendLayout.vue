@@ -52,7 +52,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { IsLogin, token } from '@/stores/token'
+import { token } from '@/stores/token'
 import { menu_key } from '@/stores/system'
 import { LOGOUT } from '@/api/token'
 import LoginOrLogout from '@/components/LoginOrLogout.vue'

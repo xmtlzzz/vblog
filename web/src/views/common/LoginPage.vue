@@ -47,6 +47,13 @@
           </a-button>
         </a-form-item>
       </a-form>
+      <a-form style="  width: 80%;margin-top: 10px">
+        <a-form-item hide-asterisk hide-label>
+          <a-button @click="handlerRevolk" :loading="revolkLoading" style="width: 100%" type="primary" html-type="submit">
+            注销登录信息
+          </a-button>
+        </a-form-item>
+      </a-form>
     </div>
   </div>
 </template>
@@ -58,6 +65,7 @@ import { token } from '@/stores/token'
 import { login_info } from '@/stores/system.js'
 import { useRouter } from 'vue-router'
 import { getDecryptedStorage, setEncryptedStorage } from '@/utils/encode_decode.js'
+import { Notification } from '@arco-design/web-vue'
 
 // form响应式对象，属性和vblog中颁发token的属性相同
 const form = reactive({
@@ -77,8 +85,7 @@ const handlerSubmit = async (data) => {
       if (form.remember_me) {
         setEncryptedStorage('userPassword', form.password)
         setEncryptedStorage('userName', form.username)
-        const pwd = getDecryptedStorage('userPassword')
-        const username = getDecryptedStorage('userName')
+        login_info.value.remember_me = form.remember_me
         login_info.value.username =localStorage.getItem("userName")
         login_info.value.password =localStorage.getItem("userPassword")
       }
@@ -103,7 +110,20 @@ const handlerSubmit = async (data) => {
   }
 }
 
-onMounted(() => {})
+const revolkLoading = ref(false)
+const handlerRevolk = () => {
+  localStorage.removeItem('userName')
+  localStorage.removeItem('userPassword')
+  localStorage.removeItem('login_info')
+  Notification.success({content:"登录状态信息已经清除，请刷新页面重新输入用户名密码",position:'topLeft'})
+}
+
+onMounted(() => {
+  if (login_info.value.remember_me) {
+    form.username = getDecryptedStorage('userName')
+    form.password = String(getDecryptedStorage('userPassword'))
+  }
+})
 
 const isRemember = () => {}
 </script>
@@ -140,6 +160,6 @@ const isRemember = () => {}
 
 .login-form {
   width: 80%;
-  height: 100%;
+  height: 60%;
 }
 </style>
