@@ -11,3 +11,8 @@ export const login_info = useStorage('login_info',
   {"username":"","password":"","remember_me":false},
   localStorage,{mergeDefaults:true}
 )
+
+export const current_blog_id = useStorage('blog_id',
+  {"current_blog_id":""},
+  localStorage,{mergeDefaults:true}
+)

@@ -8,19 +8,27 @@
         </div>
       </a-layout-header>
       <a-layout-content class="layout-content">
-        <div class="left">left</div>
-        <div class="center">
+        <div class="left">
+          <FrontendBlogScrollElement v-if="isDetailPage" :scrollElement="centerRef"></FrontendBlogScrollElement>
+        </div>
+        <div class="center" ref="centerRef">
           <router-view></router-view>
         </div>
-        <div class="right">right</div>
+<!--        <div class="right">right</div>-->
       </a-layout-content>
     </a-layout>
   </div>
 </template>
 
 <script setup>
-// 组件化的形式导入使用
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import LoginOrLogout from '@/components/LoginOrLogout.vue'
+import FrontendBlogScrollElement from '@/components/FrontendBlogScrollElement.vue'
+
+const centerRef = ref(null)
+const route = useRoute()
+const isDetailPage = computed(() => route.name === 'frontend_blog_detail')
 </script>
 
 <style lang="css" scoped>
@@ -47,19 +55,24 @@ import LoginOrLogout from '@/components/LoginOrLogout.vue'
 .layout-content {
   display: flex;
   justify-content: space-between;
+  height: calc(100vh - 60px);
 }
 .left{
-  width: 30%;
+  width: 20%;
   overflow: auto;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 60px);
 }
 .right{
-  width: 30%;
+  width: 20%;
   overflow: auto;
 }
 .center{
-  width: 100%;
+  width: 80%;
+  padding-right: 200px;
   overflow: auto;
-
+  height: calc(100vh - 60px);
 }
 .center::-webkit-scrollbar {
   display: none;

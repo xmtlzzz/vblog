@@ -17,6 +17,21 @@
         <!--      跳转到编辑页面-->
         <template #extra>
           <a-button
+            type="primary"
+            @click="
+              $router.push({
+                name: 'frontend_blog_detail',
+                query: { id: current_blog_id.current_blog_id },
+              })
+            "
+            style="margin-top: 0px; margin-right: 10px"
+          >
+            <template #icon>
+              <icon-save />
+            </template>
+            跳转预览页
+          </a-button>
+          <a-button
             class="Submit_Blog"
             type="primary"
             @click="handlerEditBlog(BlogData)"
@@ -73,6 +88,7 @@ import { onMounted, ref } from 'vue'
 import router from '@/router/index.js'
 import { Notification } from '@arco-design/web-vue'
 import axios from 'axios'
+import { current_blog_id } from '@/stores/system.js'
 
 // 通过前端路由携带的query参数去判断用户是编辑文章还是新建文章
 const route = useRoute()

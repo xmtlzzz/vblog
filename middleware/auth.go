@@ -26,6 +26,8 @@ func Auth(c *gin.Context) {
 		ck, err := c.Cookie(token.CookieName)
 		if err != nil {
 			response.Failed(c, err)
+			//  add
+			c.Abort()
 			return
 		} else {
 			accessToken = ck
@@ -39,12 +41,15 @@ func Auth(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
 	// 声明新的context对象携带token信息，用于后续其他模块调用验证token
 	// 这里key直接使用字符串不行，所以自定义一个结构体
 	ctx := context.WithValue(c.Request.Context(), TokenCtxKey{}, tk)
 	// 携带ctx信息
 	c.Request = c.Request.WithContext(ctx)
+	// 鉴权成功后继续后续处理
+	c.Next()
+	// 继续后续处理链
+	c.Next()
 }
 
 type TokenCtxKey struct {

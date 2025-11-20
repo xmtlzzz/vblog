@@ -82,7 +82,11 @@
                 <!--                跳转到编辑页面，query属性表示传递的url参数类似gin中的:id-->
                 <a-button
                   type="primary"
-                  @click="$router.push({ name: 'backend_blog_edit', query: { id: record.id } })"
+
+                  @click="()=>{
+                    $router.push({ name: 'backend_blog_edit', query: { id: record.id } })
+                    current_blog_id.current_blog_id=record.id
+                  }"
                 >
                   <template #icon>
                     <icon-edit />
@@ -137,6 +141,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { BlogQueryRequest, BlogDeleteRequest,BlogPublishRequest } from '@/api/blog'
 import dayjs from 'dayjs'
+import { current_blog_id } from '@/stores/system.js'
 
 const handlerBack = () => {
   console.log('test back')
@@ -156,6 +161,7 @@ const QueryBlogData = async (value) => {
   try {
     BlogQueryLoading.value = true
     data.value = await BlogQueryRequest(value)
+    console.log(data.value)
   } finally {
     BlogQueryLoading.value = false
   }

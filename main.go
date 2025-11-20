@@ -7,6 +7,7 @@ import (
 	"github.com/infraboard/mcube/v2/ioc/server"
 	_ "github.com/xmtlzzz/vblog/apps"
 	"github.com/xmtlzzz/vblog/test"
+	//_ "github.com/xmtlzzz/vblog/web"
 )
 
 func main() {

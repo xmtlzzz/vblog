@@ -1,12 +1,22 @@
-import axios from "axios";
-import { Message } from '@arco-design/web-vue';
-
+import axios from 'axios'
+import { Message } from '@arco-design/web-vue'
+import { token } from '@/stores/token.ts'
 // 初始化一个axios客户端，用于对接后端API
 export const client = axios.create({
-  baseURL: "",
+  baseURL: '',
   timeout: 5000,
 })
 
+// 新增部分内容，用于在axios client发送任何请求的时候设置Authorization头部，用于解决backend/blog_list请求的时候因为没有authorization头部导致的400问题
+// 后端cookies鉴权中间件逻辑失败导致的400
+client.interceptors.request.use((config)=>{
+  const tk = token.value?.access_token
+  if (tk && tk !== '') {
+    config.headers = config.headers || {}
+    config.headers['Authorization'] = `Bearer ${tk}`
+  }
+  return config
+})
 // 通过拦截器来实现后端响应信息报错信息捕获
 // interceptors就是创建一个捕获器
 // response就是捕获响应报文的内容，request就是捕获请求内容
@@ -23,7 +33,7 @@ client.interceptors.response.use(
     try {
       // 获取报错的详细内容，比如后端bcrypto的报错信息就存储在这个路径
       msg = error.response.data.message
-    }catch(error) {
+    } catch (error) {
       // 保持msg为原始错误信息
       console.log(error)
     }
